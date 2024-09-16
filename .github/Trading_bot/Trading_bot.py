@@ -16,12 +16,13 @@ exchange=ccxt.binance({
 'secret':'Apisecret',
 'enableRateLimit':True,
 'options':{
-'defaultType':'futures'}
+	'defaultType':'futures'
+}
 })
 exchange.loadMarkets()
 
 symbol='BTCUSDT'
-leverage=75
+leverage=50
 exchange.setLeverage(leverage,symbol)
 
 
@@ -184,4 +185,5 @@ def close_positions(symbol,timeframe):
 						return order
 	else:
 		pass
-			
+Data=fetch_data(symbol,'3m',1,0)
+print(Data)
