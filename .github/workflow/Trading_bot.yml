@@ -1,1 +1,32 @@
-
+name:Run Trading Bot
+on:
+	schedule:
+		-cron:
+			'*/3****'
+	workflow_dispatch:
+jobs:
+	runs-trading-bot:
+		runs-on:ubuntu-latest
+		
+		steps:
+			-name:checkout code
+			uses:actions/setup-python@v3
+			
+			-name:set up python
+			uses:actions/setup-python@v4
+			with:
+				python-version:3.9
+				
+			-name:install dependencies
+			run:
+				|
+			pip install -r requirement.txt
+			
+			-name:Run trading bot
+			env:
+				Api_key:${{secrets.money_printer1_Apikey}}
+				Api_secret:${{secrets.money_printer1_Apisecret}}
+			run:
+				|
+				python trading bot / live_bot.py
+				
