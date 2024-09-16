@@ -8,8 +8,8 @@ import tulipy as ti
 import time
 import os
 
-Apikey=os.getenv('money_printer1_Apikeys')
-Apisecret=os.getenv('money_printer1_Apikey')
+Apikey=os.getenv('MONEY_PRINTER1_APIKEY')
+Apisecret=os.getenv('MONEY_PRINTER1_APISECRET')
 
 exchange=ccxt.binance({
 'apikey':'Apikey',
