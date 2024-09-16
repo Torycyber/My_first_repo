@@ -16,13 +16,13 @@ exchange=ccxt.binance({
 'secret':'Apisecret',
 'enableRateLimit':True,
 'options':{
-	'defaultType':'futures'
+	'defaultType':'future'
 }
 })
 exchange.loadMarkets()
 
 symbol='BTCUSDT'
-leverage=50
+leverage=10
 exchange.setLeverage(leverage,symbol)
 
 
