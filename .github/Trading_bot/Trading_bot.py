@@ -184,5 +184,4 @@ def close_positions(symbol,timeframe):
 						return order
 	else:
 		pass
-Data=fetch_data(symbol,'3m',1,0)
-print(Data)
+
