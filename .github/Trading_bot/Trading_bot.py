@@ -1,19 +1,18 @@
 import ccxt
 import pandas as pd
 import numpy as np
-import datetime as dt
-from datetime import timedelta
+from datetime import datetime as dt,timedelta
 import pytz
 import tulipy as ti
 import time
 import os
 
-Apikey=os.getenv('MONEY_PRINTER1_APIKEY')
-Apisecret=os.getenv('MONEY_PRINTER1_APISECRET')
+Apikey='JtNpDF7qy7xOnGJ25wZkkLLUNzQb4X05OCaEfLAIG0Fd6IP0b20jN8lOIg74NqT4'
+Apisecret='FhYqyr9Vp9wGY9wQUicPyjDmab4WRPKWZR4ORDmDt2vaAKVImWwUQ6FHADsGZwjO'
 
 exchange=ccxt.binance({
-'apikey':'Apikey',
-'secret':'Apisecret',
+'apiKey':Apikey,
+'secret':Apisecret,
 'enableRateLimit':True,
 'options':{
 	'defaultType':'future'
@@ -28,14 +27,14 @@ exchange.setLeverage(leverage,symbol)
 
 
 def create_since(days,mins):
-	timezone=pytz.utc()
+	timezone=pytz.utc
 	Now=dt.now(timezone)
 	since=Now-timedelta(days=1*days,minutes=1*mins)
 	starttime=int(since.timestamp()*1000)
 	return starttime
 
 def create_endtime():
-	timezone=pytz.utc()
+	timezone=pytz.utc
 	Now=dt.now(timezone)
 	end=Now
 	endtime=int(end.timestamp()*1000)
@@ -57,7 +56,7 @@ def fetch_data(symbol,timeframe,days,mins):
 		except ccxt.NetworkError as e:
 				return []
 		time.sleep(1)
-	df=pd.Dataframe(all_candles,columns=['timestamp','open','high','low','close','volume'])
+	df=pd.DataFrame(all_candles,columns=['timestamp','open','high','low','close','volume'])
 	data=np.array(df)
 	return data
 
