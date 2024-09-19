@@ -7,6 +7,8 @@ import tulipy as ti
 import time
 import os
 
+
+
 Apikey='JtNpDF7qy7xOnGJ25wZkkLLUNzQb4X05OCaEfLAIG0Fd6IP0b20jN8lOIg74NqT4'
 Apisecret='FhYqyr9Vp9wGY9wQUicPyjDmab4WRPKWZR4ORDmDt2vaAKVImWwUQ6FHADsGZwjO'
 
@@ -23,6 +25,7 @@ exchange.loadMarkets()
 symbol='DOGEUSDT'
 leverage=10
 exchange.setLeverage(leverage,symbol)
+fibbs_value=0.5
 
 
 
@@ -84,16 +87,13 @@ def calculate_indicators(symbol,timeframe,days,indicators,**kwargs):
 				return bbands
 
 def Tconf_Buy(High):
-			Tconf=High[-11:]
+			Tconf=High[-5:]
 			return max(Tconf)
 
 def Tconf_sell(low):
-			Tconf=low[-11:]
+			Tconf=low[-5:]
 			return min(Tconf)
-def quantity(ub,lb,fibbs_value):
-	q=ub[-1]-lb[-1]
-	Q=fibbs_value/q
-	return Q
+
 
 def check_for_open_orders(symbol):
 	try:
@@ -114,7 +114,7 @@ def buy_sl(q,ticker):
 	return buy_sl
 
 def sell_sl(q,ticker):
-	sell_sl=ticker-q
+	sell_sl=ticker+q
 	return sell_sl
 
 def Tg_ssl(q,ticker):
@@ -127,6 +127,14 @@ def Tg_bsl(q,ticker):
 	b=q-U
 	tg=ticker-b
 	return tg
+def Tp_buy(q,ticker):
+	b=3*q
+	Tp=ticker+b
+	return Tp
+
+def Tp_sell(q,ticker):
+	b=3*q
+	tp=ticker-b
 
 		
 
@@ -171,9 +179,29 @@ def place_order(symbol,timeframe,days):
 	Sell_cond3=ma5ii[-1]<mbii[-1]
 	Sell_cond4=ma5iii[-1]<mbiii[-1]
 	Sell_cond5=close[-1]<Tconfsell
+
+	q=ub[-1]-lbi[-1]
+	Amount=fibbs_value/q
 	
 	if Buy_cond1 and Buy_cond2 and Buy_cond3 and Buy_cond4 and Buy_cond5:
-		return []
+		order=exchange.create_market_buy_order(symbol,Amount)
+		ticker=current_price(symbol)
+		sl=buy_sl(q,ticker)
+		T_bsl=Tg_bsl(q,ticker)
+		Tp=Tp_buy(q,ticker)
+
+		stoploss_order=exchange.create_stop_limit_order(symbol,'sell',Amount,price=sl,stopPrice=T_bsl)
+		take_profit=exchange.create_take_profit_order(symbol,'market','sell',Amount,price=Tp)
+		return order,stoploss_order,take_profit
+	elif Sell_cond1 and Sell_cond2 and Sell_cond3 and Sell_cond4 and Sell_cond5:
+		order=exchange.create_market_sell_order(symbol,Amount)
+		sl=sell_sl(q,ticker)
+		T_sll=Tg_ssl(q,ticker)
+		Tp=Tp_sell(q,ticker)
+		stoploss_order=exchange.create_stop_limit_order(symbol,'buy',Amount,price=sl,stopPrice=T_sll)
+		take_profit=exchange.create_take_profit_order(symbol,'market','buy',Amount,price=Tp)
+
+		return order,stoploss_order,take_profit
 def check_positions(symbol):
 	try:
 		positions=exchange.fetchPositions(symbol)
