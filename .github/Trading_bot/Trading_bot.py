@@ -20,7 +20,7 @@ exchange=ccxt.binance({
 })
 exchange.loadMarkets()
 
-symbol='BTCUSDT'
+symbol='DOGEUSDT'
 leverage=10
 exchange.setLeverage(leverage,symbol)
 
@@ -105,7 +105,28 @@ def check_for_open_orders(symbol):
 	except ccxt.NetworkError:
 		print('network')
 				
+def current_price(symbol):
+	ticker=exchange.fetchTicker(symbol)
+	return float(ticker['last'])
 
+def buy_sl(q,ticker):
+	buy_sl=ticker-q
+	return buy_sl
+
+def sell_sl(q,ticker):
+	sell_sl=ticker-q
+	return sell_sl
+
+def Tg_ssl(q,ticker):
+	U=q*0.05
+	b=q-U
+	tg=ticker+b
+	return tg
+def Tg_bsl(q,ticker):
+	U=q*0.05
+	b=q-U
+	tg=ticker-b
+	return tg
 
 		
 
