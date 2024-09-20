@@ -67,7 +67,7 @@ def calculate_mins(timeframe,periods):
 			units=timeframe[-1]
 			value=float(timeframe[:-1])
 			if units== 'm':
-				return value *periods
+				return value * periods
 			if units== 'h':
 				return value * periods* 60
 			if units== 'd':
@@ -138,6 +138,7 @@ def Tp_buy(q,ticker):
 def Tp_sell(q,ticker):
 	b=3*q
 	tp=ticker-b
+	return tp
 
 		
 
@@ -149,14 +150,15 @@ def place_order(symbol,timeframe,days):
 		low=Data[:,3]
 		close=Data[:,4]
 
-		obv=calculate_indicators(symbol,timeframe='3m',days=days,indicators='obv')
+		obv=calculate_indicators(symbol,timeframe='3m',days=days,indicators='obv',period=1)
+		time.sleep(1)
 		
 		ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
 		
 		
 		ma5iii=calculate_indicators(symbol,timeframe='1h',days=days,indicators='sma',period=5)
 		
-		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev)
+		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev=2)
 
 		
 		bbandiii=calculate_indicators(symbol,timeframe='1h',days=days,indicator='bbands',period=10,stddev=2)
@@ -204,6 +206,7 @@ def place_order(symbol,timeframe,days):
 		T_sll=Tg_ssl(q,ticker)
 		Tp=Tp_sell(q,ticker)
 		stoploss_order=exchange.create_stop_limit_order(symbol,'buy',Amount,price=sl,stopPrice=T_sll)
+		time.sleep(1)
 		take_profit=exchange.create_take_profit_order(symbol,'market','buy',Amount,price=Tp)
 
 		return order,stoploss_order,take_profit
@@ -217,8 +220,9 @@ def check_positions(symbol):
 	except ccxt.NetworkError:
 		return []
 
-def close_positions(symbol,timeframe):
+def close_positions(symbol):
 	positions=check_positions(symbol)
+	time.sleep(1)
 	if len(positions)>0:
 			days=1
 			ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
@@ -237,7 +241,6 @@ def close_positions(symbol,timeframe):
 					if order :
 						return order
 	else:
-		pass
-
-ma5=calculate_indicators(symbol,'3m',1,'sma',period=5)
-obv=calculate_indicators(symbol,'3m',1,indicators='obv')
+		return []
+place_trade=place_order(symbol,'3m',days=1,)
+close_trade=close_positions(symbol)
