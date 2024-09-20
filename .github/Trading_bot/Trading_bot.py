@@ -85,6 +85,9 @@ def calculate_indicators(symbol,timeframe,days,indicators,**kwargs):
 			elif indicators=='bbands':
 				bbands=ti.bbands(Data[:,4],period,stddev)
 				return bbands
+			elif indicators=='obv':
+				obv=ti.obv(Data[:,4],Data[:,5])
+				return obv
 
 def Tconf_Buy(High):
 			Tconf=High[-5:]
@@ -145,38 +148,40 @@ def place_order(symbol,timeframe,days):
 		High=Data[:,2]
 		low=Data[:,3]
 		close=Data[:,4]
+
+		obv=calculate_indicators(symbol,timeframe='3m',days=days,indicators='obv')
 		
 		ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
 		
-		ma5ii=calculate_indicators(symbol,timeframe='15m',days=days,indicators='sma',period=5)
 		
 		ma5iii=calculate_indicators(symbol,timeframe='1h',days=days,indicators='sma',period=5)
 		
-		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev=2)
-		
-		bbandii=calculate_indicators(symbol,timeframe='15m',days=days,indicator='bbands',period=10,stddev=2)
+		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev)
+
 		
 		bbandiii=calculate_indicators(symbol,timeframe='1h',days=days,indicator='bbands',period=10,stddev=2)
 		ma20=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=20)
 		mbi=bbandi[1]
-		mbii=bbandii[1]
+
 		mbiii=bbandiii[1]
 		lbi=bbandi[0]
 		ub=bbandi[2]
 		Tconfbuy=Tconf_Buy(High)
+		Tconfibuy=Tconf_Buy(obv)
+		Tconfisell=Tconf_sell(obv)
 		Tconfsell=Tconf_sell(low)
 	
 	
 	Buy_cond1=ma5i[-1] >ma20[-1]
 	Buy_cond2=ma5i[-1] >mbi[-1]
-	Buy_cond3=ma5ii[-1]>mbii[-1]
 	Buy_cond4=ma5iii[-1]>mbiii[-1]
 	Buy_cond5=close[-1]>Tconfbuy
+	Buy_cond3=obv[-1]>Tconfibuy
 	
 		
 	Sell_cond1=ma5i[-1] <ma20[-1]
 	Sell_cond2=ma5i[-1] <mbi[-1]
-	Sell_cond3=ma5ii[-1]<mbii[-1]
+	Sell_cond3=obv[-1]<Tconfisell(obv)
 	Sell_cond4=ma5iii[-1]<mbiii[-1]
 	Sell_cond5=close[-1]<Tconfsell
 
@@ -224,13 +229,15 @@ def close_positions(symbol,timeframe):
 			
 			for position in positions:
 				amount=position['position Amount']
-				side=position['buy']
-				if side==['buy'] and close_buy_cond1:
-					order =exchange.createOrder(symbol,amount,side='sell')
-				elif side==['sell'] and close_sell_cond1:
-					order =exchange.createOrder(symbol,amount,side='sell')
+				side=position['side']
+				if side=='buy' and close_buy_cond1:
+					order =exchange.createMarketOrder(symbol,amount,side='sell')
+				elif side=='sell' and close_sell_cond1:
+					order =exchange.createMarketOrder(symbol,amount,side='sell')
 					if order :
 						return order
 	else:
 		pass
 
+ma5=calculate_indicators(symbol,'3m',1,'sma',period=5)
+obv=calculate_indicators(symbol,'3m',1,indicators='obv')
