@@ -1,1 +1,8 @@
-
+ccxt
+os
+datetime
+pytz
+pandas
+numpy
+time
+tulipy
