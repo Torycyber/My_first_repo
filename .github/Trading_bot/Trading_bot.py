@@ -22,7 +22,7 @@ exchange=ccxt.binance({
 })
 exchange.loadMarkets()
 
-symbol='DOGEUSDT'
+symbol='XLMUSDT'
 leverage=50
 exchange.setLeverage(leverage,symbol)
 fibbs_value=0.5
