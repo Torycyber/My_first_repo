@@ -9,8 +9,8 @@ import os
 
 
 
-Apikey='JtNpDF7qy7xOnGJ25wZkkLLUNzQb4X05OCaEfLAIG0Fd6IP0b20jN8lOIg74NqT4'
-Apisecret='FhYqyr9Vp9wGY9wQUicPyjDmab4WRPKWZR4ORDmDt2vaAKVImWwUQ6FHADsGZwjO'
+Apikey=os.getenv('MY_MONEY_PRINTER1_APIKEY')
+Apisecret=os.getenv('MY_MONEY_PRINTER1_APISECRET')
 
 exchange=ccxt.binance({
 'apiKey':Apikey,
