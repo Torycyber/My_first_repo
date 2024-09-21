@@ -23,7 +23,7 @@ exchange=ccxt.binance({
 exchange.loadMarkets()
 
 symbol='DOGEUSDT'
-leverage=10
+leverage=50
 exchange.setLeverage(leverage,symbol)
 fibbs_value=0.5
 
@@ -155,7 +155,7 @@ def place_order(symbol,timeframe,days):
 		
 		ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
 		
-		
+		time.sleep(1)
 		ma5iii=calculate_indicators(symbol,timeframe='1h',days=days,indicators='sma',period=5)
 		
 		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev=2)
