@@ -2,7 +2,7 @@ name: Trading Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 3 minutes
+    - cron: '*/5 * * * *' 
   workflow_dispatch:  # Manual trigger
 
 jobs:
@@ -24,8 +24,8 @@ jobs:
 
       - name: Run trading bot
         env:
-          API_KEY: ${{ secrets.API_KEY }}  # Access your API key
-          API_SECRET: ${{ secrets.API_SECRET }}  # Access your API secret
+          API_KEY: ${{ secrets.MONEY_PRINTER1_API_KEY }}  # Access your API key
+          API_SECRET: ${{ secrets.MONEY_PRINTER1_API_SECRET }}  # Access your API secret
         run: |
-          python your_trading_bot.py  # Change to your bot's script
+          python Trading_bot.py  # Change to your bot's script
 	  
