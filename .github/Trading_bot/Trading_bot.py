@@ -22,7 +22,7 @@ exchange=ccxt.binance({
 })
 exchange.loadMarkets()
 
-symbol='XLMUSDT'
+symbol='DOGEUSDT'
 leverage=50
 exchange.setLeverage(leverage,symbol)
 fibbs_value=0.5
@@ -85,8 +85,8 @@ def calculate_indicators(symbol,timeframe,days,indicators,**kwargs):
 			elif indicators=='bbands':
 				bbands=ti.bbands(Data[:,4],period,stddev)
 				return bbands
-			elif indicators=='obv':
-				obv=ti.obv(Data[:,4],Data[:,5])
+			elif indicators=='stoch':
+				obv=ti.obv(Data[:,2],Data[:,3],Data[:,4],50,3,3)
 				return obv
 
 def Tconf_Buy(High):
