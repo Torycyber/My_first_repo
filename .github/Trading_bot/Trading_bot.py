@@ -9,8 +9,8 @@ import os
 
 
 
-Apikey='JtNpDF7qy7xOnGJ25wZkkLLUNzQb4X05OCaEfLAIG0Fd6IP0b20jN8lOIg74NqT4'
-Apisecret='FhYqyr9Vp9wGY9wQUicPyjDmab4WRPKWZR4ORDmDt2vaAKVImWwUQ6FHADsGZwjO'
+Apikey=os.getenv('MY_MONEY_PRINTER1_APIKEY')
+Apisecret=os.getenv('MY_MONEY_PRINTER1_APISECRET')
 
 exchange=ccxt.binance({
 'apiKey':Apikey,
@@ -23,7 +23,7 @@ exchange=ccxt.binance({
 exchange.loadMarkets()
 
 symbol='DOGEUSDT'
-leverage=10
+leverage=50
 exchange.setLeverage(leverage,symbol)
 fibbs_value=0.5
 
@@ -86,8 +86,13 @@ def calculate_indicators(symbol,timeframe,days,indicators,**kwargs):
 				bbands=ti.bbands(Data[:,4],period,stddev)
 				return bbands
 			elif indicators=='stoch':
+<<<<<<< HEAD
 				stoch=ti.stoch(Data[:,2],Data[:,3],Data[:,4],50,3,3)
 				return stoch
+=======
+				obv=ti.obv(Data[:,2],Data[:,3],Data[:,4],50,3,3)
+				return obv
+>>>>>>> dde8f5b2d545a3dc43a0c9f29dcee3f9b34d8453
 
 def Tconf_Buy(High):
 			Tconf=High[-20:]
@@ -156,7 +161,7 @@ def place_order(symbol,timeframe,days):
 		
 		ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
 		
-		
+		time.sleep(1)
 		ma5iii=calculate_indicators(symbol,timeframe='1h',days=days,indicators='sma',period=5)
 		
 		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev=2)

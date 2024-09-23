@@ -19,15 +19,13 @@ jobs:
 				python-version:3.9
 				
 			-name:install dependencies
-			run:
-				|
-			pip install -r requirement.txt
+			run:|
+                          pip install -r requirement.txt
 			
 			-name:Run trading bot
 			env:
 				Api_key:${{secrets.money_printer1_Apikey}}
 				Api_secret:${{secrets.money_printer1_Apisecret}}
-			run:
-				|
-				python trading bot / live_bot.py
+			run:|
+                          python trading bot / live_bot.py
 				
