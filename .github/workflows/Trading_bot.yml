@@ -1,32 +1,31 @@
-name: Run Trading_bot
+name: Trading Bot
 
 on:
   schedule:
-	- cron:'*/3****'
-  workflow_dispatch:
+    - cron: '*/5 * * * *'  # Every 3 minutes
+  workflow_dispatch:  # Manual trigger
 
 jobs:
-	run-trading-bot:
-		runs-on:ubuntu-latest
-		
-		steps:
-			-name:checkout repository 
-			 uses:actions/setup-python@v3
-			
-			-name:set up python
-			 uses:actions/setup-python@v3
-			with:
-				python-version:3.9
-				
-			-name:install dependencies
-			run:|
-			  python -m pip install --upgrade pip
-                          pip install -r requirements.txt
-			
-			-name:Run trading bot
-			env:
-				Api_key:${{secrets.MONEY_PRINTER1_APIKEY}}
-				Api_secret:${{secrets.MONEY_PRINTER1_APISECRET}}
-			run:|
-              python Trading bot / Trading_bot.py
-				
+  run-trading-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'  # Change to your required version
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt  # Adjust if needed
+
+      - name: Run trading bot
+        env:
+          API_KEY: ${{ secrets.API_KEY }}  # Access your API key
+          API_SECRET: ${{ secrets.API_SECRET }}  # Access your API secret
+        run: |
+          python your_trading_bot.py  # Change to your bot's script
+	  
