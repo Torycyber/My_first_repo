@@ -27,5 +27,5 @@ jobs:
           API_KEY: ${{ secrets.MONEY_PRINTER1_API_KEY }}  # Access your API key
           API_SECRET: ${{ secrets.MONEY_PRINTER1_API_SECRET }}  # Access your API secret
         run: |
-          python Trading_bot.py  # Change to your bot's script
+          python Trading_bot/Trading_bot.py  # Change to your bot's script
 	  
