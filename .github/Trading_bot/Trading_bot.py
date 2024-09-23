@@ -151,19 +151,19 @@ def place_order(symbol,timeframe,days):
 		low=Data[:,3]
 		close=Data[:,4]
 
-		stoch=calculate_indicators(symbol,timeframe='3m',days=days,indicators='stoch',period=50)
+		stoch=calculate_indicators(symbol,timeframe='5m',days=days,indicators='stoch',period=50)
 		time.sleep(1)
 		
-		ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
+		ma5i=calculate_indicators(symbol,timeframe='5m',days=days,indicators='sma',period=5)
 		
 		time.sleep(1)
 		ma5iii=calculate_indicators(symbol,timeframe='1h',days=days,indicators='sma',period=5)
 		
-		bbandi=calculate_indicators(symbol,timeframe='3m',days=days,indicator='bbands',period=10,stddev=2)
+		bbandi=calculate_indicators(symbol,timeframe='5m',days=days,indicator='bbands',period=10,stddev=2)
 
 		
 		bbandiii=calculate_indicators(symbol,timeframe='1h',days=days,indicator='bbands',period=10,stddev=2)
-		ma20=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=20)
+		ma20=calculate_indicators(symbol,timeframe='5m',days=days,indicators='sma',period=20)
 		mbi=bbandi[1]
 		K=stoch[0]
 		d=stoch[1]
@@ -228,8 +228,8 @@ def close_positions(symbol):
 	time.sleep(1)
 	if len(positions)>0:
 			days=1
-			ma5i=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=5)
-			ma20=calculate_indicators(symbol,timeframe='3m',days=days,indicators='sma',period=20)
+			ma5i=calculate_indicators(symbol,timeframe='5m',days=days,indicators='sma',period=5)
+			ma20=calculate_indicators(symbol,timeframe='5m',days=days,indicators='sma',period=20)
 			
 			close_buy_cond1=ma20[-1]>ma5i[-1]
 			close_sell_cond1=ma20[-1]<ma5i[-1]
@@ -245,5 +245,5 @@ def close_positions(symbol):
 						return order
 	else:
 		return []
-place_trade=place_order(symbol,'3m',days=1,)
+place_trade=place_order(symbol,'5m',days=1,)
 close_trade=close_positions(symbol)
