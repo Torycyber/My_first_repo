@@ -89,9 +89,6 @@ def calculate_indicators(symbol,timeframe,days,indicators,**kwargs):
 <<<<<<< HEAD
 				stoch=ti.stoch(Data[:,2],Data[:,3],Data[:,4],50,3,3)
 				return stoch
-=======
-				obv=ti.obv(Data[:,2],Data[:,3],Data[:,4],50,3,3)
-				return obv
 >>>>>>> dde8f5b2d545a3dc43a0c9f29dcee3f9b34d8453
 
 def Tconf_Buy(High):
