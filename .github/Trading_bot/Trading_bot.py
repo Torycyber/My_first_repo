@@ -170,21 +170,21 @@ def place_order(symbol,timeframe,days):
 		mbiii=bbandiii[1]
 		lbi=bbandi[0]
 		ub=bbandi[2]
-		Tconfbuy=Tconf_Buy(High)
+		Tconfbuy=Tconf_Buy(close)
 	
-		Tconfsell=Tconf_sell(low)
+		Tconfsell=Tconf_sell(close)
 	
 	
 	Buy_cond1=ma5i[-1] >ma20[-1]
 	Buy_cond2=ma5i[-1] >mbi[-1]
 	Buy_cond4=ma5iii[-1]>mbiii[-1]
 	Buy_cond5=close[-1]>Tconfbuy
-	Buy_cond3=K[-1] > d[-1] and 30 < K[-1]< 70
+	Buy_cond3=K[-1] > d[-1] and K[-1] < 70
 	
 		
 	Sell_cond1=ma5i[-1] <ma20[-1]
 	Sell_cond2=ma5i[-1] <mbi[-1]
-	Sell_cond3=K[-1] < d[-1]
+	Sell_cond3=K[-1] < d[-1] and K[-1] > 30
 	Sell_cond4=ma5iii[-1]<mbiii[-1]
 	Sell_cond5=close[-1]<Tconfsell
 
