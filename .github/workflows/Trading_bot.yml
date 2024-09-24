@@ -12,15 +12,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Specify your Node.js version here
+
+      - name: Install Node.js dependencies
+        run: npm install
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # Change to your required version
+          python-version: '3.9'  # Specify your Python version here
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt  # Adjust if needed
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
 
       - name: Run trading bot
         env:
