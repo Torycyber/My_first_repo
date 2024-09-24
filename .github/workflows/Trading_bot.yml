@@ -26,6 +26,5 @@ jobs:
         env:
           API_KEY: ${{ secrets.MONEY_PRINTER1_API_KEY }}  # Access your API key
           API_SECRET: ${{ secrets.MONEY_PRINTER1_API_SECRET }}  # Access your API secret
-        run:  |
+        run:
           python Trading_bot/Trading_bot.py
-	  
