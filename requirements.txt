@@ -2,7 +2,6 @@ pandas
 ccxt
 tulipy
 numpy
-os
 time
 datetime
 pytz
