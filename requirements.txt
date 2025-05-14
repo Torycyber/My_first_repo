@@ -1,6 +1,0 @@
-pandas
-ccxt
-tulipy
-numpy
-datetime
-pytz
