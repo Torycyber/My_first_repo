@@ -352,3 +352,457 @@ FALLBACK_TOKEN_MAP = {
     "ANON": "0x79bbf4508b1391af3a0f4b30bb5fc4aa9ab0e07c",
     "HIP": "0xa0995d43901551601060447f9abf93ebc277cec2",
     
+}
+
+load_dotenv()  # loads from .env by default
+contract_address_real = []
+contract_address_fork = []
+contract_abi=[]
+def bundle_flash_loan(
+    token_in,#token to borrow
+    token_out,#token to trade
+    buy_dex,# lowest price dex 
+    sell_dex,#highest price dex
+    amount,
+    contract_address,
+    abi_path=contract_abi
+):
+    # === Alchemy Arbitrum Setup ===
+    ALCHEMY_KEY = os.getenv("alchemy_api_key")
+    ALCHEMY_URL = f"https://arb-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
+    PRIVATE_KEY = os.getenv("WALLET_KEY")
+    
+    web3 = Web3(Web3.HTTPProvider(ALCHEMY_URL))
+    account = Account.from_key(PRIVATE_KEY)
+    ACCOUNT_ADDRESS = account.address
+    
+    #amount_wei=Web3.to_wei(amount, 'mwei')
+
+    # === Load Contract ===
+    contract_address = Web3.to_checksum_address(contract_address)
+    with open(abi_path) as f:
+        contract_abi = json.load(f)
+    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+    # === Encode Parameters for initiateArbitrage ===
+    params = eth_abi.encode(
+        ['address', 'address', 'address', 'address', 'uint256'],
+        [
+            Web3.to_checksum_address(buy_dex),
+            Web3.to_checksum_address(sell_dex),
+            Web3.to_checksum_address(token_in),
+            Web3.to_checksum_address(token_out),
+            0  # minReturn = 0
+        ]
+    )
+
+    # === Build Transaction ===
+    tx = contract.functions.initiateArbitrage(
+        Web3.to_checksum_address(token_in),
+        amount_wei,
+        params
+    ).build_transaction({
+        'from': ACCOUNT_ADDRESS,
+        'nonce': web3.eth.get_transaction_count(ACCOUNT_ADDRESS),
+        'gasPrice': web3.eth.gas_price,
+        'chainId': 42161  # Arbitrum One
+    })
+
+    # === Estimate Gas and Send ===
+    tx['gas'] = web3.eth.estimate_gas(tx)
+    signed_tx = web3.eth.account.sign_transaction(tx, PRIVATE_KEY)
+    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+    print(f"Flashloan TX sent: {web3.to_hex(tx_hash)}")
+    return web3.to_hex(tx_hash)
+
+ALCHEMY_KEY = os.getenv("alchemy_api_key")
+ALCHEMY_URL = f"https://arb-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
+PRIVATE_KEY = os.getenv("WALLET_KEY")
+w3 = Web3(Web3.HTTPProvider(ALCHEMY_URL))
+
+# Transaction hash (replace with your actual transaction hash)
+tx_hash = None
+
+# Check status of a transaction
+def check_for_pending_tx(tx_hash):
+    if tx_hash is None:
+        return 0
+    try:
+        receipt = w3.eth.get_transaction_receipt(tx_hash)
+        if receipt and receipt.status in (0, 1):
+            return 0  # success or failure
+    except Exception as e:
+        return e
+    return 1  # pending
+
+
+
+
+
+# Arbiscan API Key
+arbiscan_api_key = 'NG1EFT9ARUX3D2USIBA3BHNR5ZBRE8WFQJ' #change to .env
+
+
+ALCHEMY_KEY = os.getenv("alchemy_api_key")
+ALCHEMY_URL = f"https://arb-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
+PRIVATE_KEY = os.getenv("WALLET_KEY")
+web3= Web3(Web3.HTTPProvider(ALCHEMY_URL))
+
+
+# Basic ABIs for Uniswap V2 and V3
+METHOD_FORMATS = {
+    "v2": {
+        "method": "swapExactTokensForTokens",
+        "args_format": [
+            "uint256",        # amountIn
+            "uint256",        # amountOutMin
+            "address[]",      # path
+            "address",        # recipient
+            "uint256"         # deadline
+        ]
+    },
+    "dodo": {
+        "method": "dodoSwapV2TokenToToken",
+        "args_format": [
+            "address",        # tokenIn
+            "address",        # tokenOut
+            "uint256",        # amountIn
+            "uint256",        # minReturnAmount
+            "address[]",      # mixPairs (empty for default)
+            "uint256"         # deadline
+        ]
+    },
+    "uniswapV3": {
+        "method": "exactInputSingle",
+        "args_format": {
+            "tokenIn": "address",
+            "tokenOut": "address",
+            "fee": "uint24",
+            "recipient": "address",
+            "deadline": "uint256",
+            "amountIn": "uint256",
+            "amountOutMinimum": "uint256",
+            "sqrtPriceLimitX96": "uint160"
+        }
+    }
+}
+
+
+DEX_LIST = [
+    ["SushiSwap", Web3.toChecksumAddress("0x1b02da8cb0d097eb8d57a175b88c7d8b47997506"), "v2"],
+    ["Camelot", Web3.toChecksumAddress("0xc873fecbd354f5a56e00e710b90ef4201db2448d"), "v2"],
+    ["TraderJoe", Web3.toChecksumAddress("0xb4315eaf84bf6b1bdfcf3f9b5e6f5f8f1a42f66e"), "v2"],
+    ["Chronos", Web3.toChecksumAddress("0x46d3ecbf6e7410aef4b032054f1c409a0efc9b71"), "v2"],
+    ["ZyberSwap", Web3.toChecksumAddress("0x5bd7cc970f1b9fbc4730dc84c74e6f2f1e3fca3c"), "v2"],
+    ["Ramses", Web3.toChecksumAddress("0xaaa479483c2d2f0649474ea42e64dfd947ec849c"), "v2"],
+    ["SolidLizard", Web3.toChecksumAddress("0xa4d7aC61bCfb2457aEfB3cDaF9D39d22f932e62d"), "v2"],
+    ["KyberSwap", Web3.toChecksumAddress("0x1c87257f5e8609940bc751a07bb085bb7f8cdbe6"), "v2"],
+    ["DODO", Web3.toChecksumAddress("0xa222e6a71d1a1dd5f279805fbe38d5329c1d0e70"), "dodo"],
+    ["UniswapV3", Web3.toChecksumAddress("0xe592427a0aece92de3edee1f18e0157c05861564"), "uniswapV3"]
+]
+
+
+# Global ABI cache
+cache_dex_abi = {}
+
+# ERC20 minimal ABI
+ERC20_ABI = [
+    {"constant": True, "name": "symbol", "outputs": [{"name": "", "type": "string"}], "type": "function"},
+    {"constant": True, "name": "decimals", "outputs": [{"name": "", "type": "uint8"}], "type": "function"},
+]
+
+# --- DEX Routers (Arbitrum) ---
+DEX_ROUTERS = {
+    "SushiSwap":     "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",
+    "Camelot":       "0xc873fecbd354f5a56e00e710b90ef4201db2448d",
+    "TraderJoe":     "0xb4315eaf84bf6b1bdfcf3f9b5e6f5f8f1a42f66e",
+    "Chronos":       "0x46d3ecbf6e7410aef4b032054f1c409a0efc9b71",
+    "ZyberSwap":     "0x5bd7cc970f1b9fbc4730dc84c74e6f2f1e3fca3c",
+    "Ramses":        "0xaaa479483c2d2f0649474ea42e64dfd947ec849c",
+    "SolidLizard":   "0xa4d7aC61bCfb2457aEfB3cDaF9D39d22f932e62d",
+    "KyberSwap":     "0x1c87257f5e8609940bc751a07bb085bb7f8cdbe6",
+    "DODO":          "0xa222e6a71d1a1dd5f279805fbe38d5329c1d0e70",
+}
+
+# Uniswap V3 Quoter and fee tiers
+UNIV3_QUOTER = Web3.to_checksum_address("0x61fFE014bA17989E743c5F6cB21bF9697530B21e")
+UNIV3_FEE_TIERS = [100, 500, 3000, 10000]
+
+
+# --- Token resolution helpers ---
+def resolve_token(symbol: str):
+    address = FALLBACK_TOKEN_MAP.get(symbol.upper())
+    if not address:
+        print(f"Token '{symbol}' not found.")
+        return None
+    try:
+        return Web3.to_checksum_address(address)
+    except Exception:
+        return None
+
+def get_token_info(address):
+    try:
+        address = Web3.to_checksum_address(address)
+        token = web3.eth.contract(address=address, abi=ERC20_ABI)
+        symbol = token.functions.symbol().call()
+        decimals = token.functions.decimals().call()
+        return {"address": address, "symbol": symbol, "decimals": decimals}
+    except:
+        return None
+
+
+# --- Quoting functions with ABI cache ---
+def get_v2_quote(router_addr, token_in, token_out, amount_in):
+    try:
+        if router_addr not in cache_dex_abi:
+            contract = Contract.from_explorer(router_addr)
+            cache_dex_abi[router_addr] = contract.abi
+        router = Contract.from_abi("V2Router", router_addr, cache_dex_abi[router_addr])
+        amounts = router.getAmountsOut.call(amount_in, [token_in, token_out])
+        return amounts[-1]
+    except:
+        return 0
+
+def get_v3_quote(token_in, token_out, amount_in, fee_tiers, quoter_addr):
+    best_quote = 0
+    best_fee = None
+    try:
+        if quoter_addr not in cache_dex_abi:
+            contract = Contract.from_explorer(quoter_addr)
+            cache_dex_abi[quoter_addr] = contract.abi
+        quoter = Contract.from_abi("V3Quoter", quoter_addr, cache_dex_abi[quoter_addr])
+
+        for fee in fee_tiers:
+            try:
+                quote = quoter.quoteExactInputSingle.call(token_in, token_out, fee, amount_in, 0)
+                if quote > best_quote:
+                    best_quote = quote
+                    best_fee = fee
+            except:
+                continue
+    except:
+        return 0, None
+    return best_quote, best_fee
+
+
+# --- DEX price comparison ---
+def compare_prices_across_dex(token_in, token_out, amount_in, dex_routers, quoter, fee_tiers):
+    results = []
+
+    for name, addr in dex_routers.items():
+        addr = Web3.to_checksum_address(addr)
+        quote = get_v2_quote(addr, token_in, token_out, amount_in)
+        results.append({
+            "dex": name,
+            "price_out": quote,
+            "address": addr,
+            "type": "v2",
+            "fee": None
+        })
+
+    v3_quote, v3_fee = get_v3_quote(token_in, token_out, amount_in, fee_tiers, quoter)
+    results.append({
+        "dex": "UniswapV3",
+        "price_out": v3_quote,
+        "address": quoter,
+        "type": "v3",
+        "fee": v3_fee
+    })
+
+    sorted_results = sorted(results, key=lambda x: x["price_out"], reverse=True)
+    return {
+        "best": sorted_results[0],
+        "min": sorted_results[-1],
+        "all": results
+    }
+
+
+# --- Human-readable quote function ---
+def understand_price_gotten(token_in_symbol, token_out_symbol, amount, dex_routers, quoter, fee_tiers):
+    token_in = resolve_token(token_in_symbol)
+    token_out = resolve_token(token_out_symbol)
+    if not token_in or not token_out:
+        print("Could not resolve tokens.")
+        return None
+
+    token_in_info = get_token_info(token_in)
+    token_out_info = get_token_info(token_out)
+    if not token_in_info or not token_out_info:
+        print("Could not fetch token metadata.")
+        return None
+
+    amount_in = int(amount * (10 ** token_in_info["decimals"]))
+    result = compare_prices_across_dex(token_in, token_out, amount_in, dex_routers, quoter, fee_tiers)
+
+    best = result["best"]
+    worst = result["min"]
+
+    return {
+        "input_amount": amount,
+        "token_in": token_in_info["symbol"],
+        "token_out": token_out_info["symbol"],
+        "best_dex": best["dex"],
+        "best_price": best["price_out"] / (10 ** token_out_info["decimals"]),
+        "best_fee": best["fee"],
+        "worst_dex": worst["dex"],
+        "worst_price": worst["price_out"] / (10 ** token_out_info["decimals"]),
+        "worst_fee": worst["fee"],
+    }
+
+
+
+def get_ammount_to_profit(token_in_symbol, token_out_symbol, amount_in,DEX_ROUTERS,UNIV3_QUOTER,UNIV3_FEE_TIERS):
+    compare = understand_price_gotten(token_in_symbol, token_out_symbol, amount_in,DEX_ROUTERS,UNIV3_QUOTER,UNIV3_FEE_TIERS)
+    if not compare:
+        return None
+    print(compare)
+
+    disc = compare["best_price"] - compare["worst_price"]
+    if 0.0005 < disc <= 0.0009:
+        return 1000000
+    elif 0.001 < disc <= 0.009:
+        return 1000000
+    elif 0.005 < disc <= 0.009:
+        return 100000
+    elif 0.01 < disc <= 0.09:
+        return 100000
+    elif 1 < disc <= 9:
+        return 1000
+    elif  disc >= 9 :
+        return 100
+    
+    return None
+
+
+
+def build_swap_tx(router_addr, method_name, args):
+    router = Contract.from_explorer(router_addr)
+    method = getattr(router, method_name)
+    calldata = method.encode_input(*args)
+    return calldata
+    
+from brownie import accounts, Contract
+from eth_abi import encode_abi
+
+
+
+def estimate_gas_for_arbitrage(contract_address, abi, token_in, amount, buy_dex, sell_dex, token_out, min_return, bribe_token, bribe_swap_data):
+    account = accounts[0]
+    contract = Contract.from_abi("FlashArbitrage", contract_address, abi)
+
+    params = encode_abi(
+        ["address", "address", "address", "address", "uint256", "address", "bytes"],
+        [buy_dex, sell_dex, token_in, token_out, min_return, bribe_token, bribe_swap_data]
+    )
+
+    gas_estimate = contract.initiateArbitrage.estimate_gas(
+        token_in,
+        amount,
+        params,
+        {"from": account}
+    )
+
+    print(f"Estimated gas: {gas_estimate}")
+    return gas_estimate
+
+
+
+def simulate_trade(token_in_symbol, token_out_symbol, amount_in,DEX_ROUTERS,UNIV3_QUOTER,UNIV3_FEE_TIERS,token_in,token_out):
+    amount = get_ammount_to_profit(token_in_symbol, token_out_symbol, amount_in,DEX_ROUTERS,UNIV3_QUOTER,UNIV3_FEE_TIERS)
+    if not amount:
+        return None
+    print(amount)
+
+    result = understand_price_gotten(token_in_symbol, token_out_symbol, amount_in,DEX_ROUTERS,UNIV3_QUOTER,UNIV3_FEE_TIERS)
+    if not result:
+        return None
+    print(result)
+
+    disc = result["best_price"] - result["worst_price"]
+    if 0.0005 < disc:
+        Amount_init= amount
+        final_amount= amount + disc
+        Gas = estimate_gas_for_arbitrage(contract_address,abi, token_in_, amount, buy_dex, sell_dex, token_out,0,token_in, bribe_swap_data)
+        if disc > 
+        print('opportunity')
+        return {
+            "amount": 1000000,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price" : result["worst_price"]
+        }
+    elif 0.0001 < disc <= 0.0009:
+       # print('oppurtunity')
+        return {
+            "amount": 1000000,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price" :result["worst_price"] 
+        }
+    elif 0.001 < disc <= 0.09:
+        #print('opp')
+        return {
+            "amount": 100000,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price" :result["worst_price"]
+        }
+    elif 0.1 < disc <= 0.9:
+        #print('opp')
+        return {
+            "amount": 10000,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price":result["worst_price"]
+        }
+    elif 1 < disc <= 9:
+        #print('opp')
+        return {
+            "amount": 1000,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price" :result["worst_price"]
+        }
+    elif  disc >= 9 :
+        #print('opp')
+        return {
+            "amount": 10,
+            "best_dex_address": result["best_dex_address"],
+            "worst_dex_address": result["worst_dex_address"],
+            "price" :result["worst_price"]
+       }
+
+    return None
+
+def arbitrage_bot(contract_address):
+    index= 0
+    tx_hash= 0
+    symbols = list(FALLBACK_TOKEN_MAP.keys())
+    for i in range(len(symbols)):
+        token0 = symbols[i]
+        token1 = "USDC"
+        trade = simulate_trade(token0,token1)
+        status = check_for_pending_tx(tx_hash)
+        if trade and status ==0 and i == index:
+            tx_hash = bundle_flash_loan(
+                resolve_token(token1),
+                resolve_token(token0),
+                trade["worst_dex_address"],
+                trade["best_dex_address"],
+                trade["amount"]*trade["price"],
+                contract_address
+                ) 
+            index = (i + 1) % len(symbols)
+            break
+        else:
+            continue 
+
+while True:
+    try:
+        arbitrage_bot(contract_address)
+    except Exception as e:
+        continue 
+    except warnings as W:
+        continue 
+    
